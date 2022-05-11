@@ -22,6 +22,7 @@ import org.schabi.newpipe.extractor.localization.ContentCountry;
 import org.schabi.newpipe.extractor.localization.Localization;
 import org.schabi.newpipe.extractor.playlist.PlaylistExtractor;
 import org.schabi.newpipe.extractor.search.SearchExtractor;
+import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeBrowseExtractor;
 import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeChannelExtractor;
 import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeCommentsExtractor;
 import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeFeedExtractor;
@@ -124,6 +125,8 @@ public class YoutubeService extends StreamingService {
 
         if (!contentFilters.isEmpty() && contentFilters.get(0).startsWith("music_")) {
             return new YoutubeMusicSearchExtractor(this, query);
+        } else if (query.getSearchString().equalsIgnoreCase(":discover:")) {
+            return new YoutubeBrowseExtractor(this, query);
         } else {
             return new YoutubeSearchExtractor(this, query);
         }
