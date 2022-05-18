@@ -4,6 +4,7 @@ import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
+import com.grack.nanojson.JsonWriter;
 
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.services.youtube.YoutubeService;
@@ -15,23 +16,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.annotation.Nonnull;
 
+import static org.schabi.newpipe.extractor.ServiceList.YouTube;
+import static org.schabi.newpipe.extractor.services.youtube.YoutubeParsingHelper.getJsonPostResponse;
+import static org.schabi.newpipe.extractor.services.youtube.YoutubeParsingHelper.prepareDesktopJsonBuilder;
 import static org.schabi.newpipe.extractor.subscription.SubscriptionExtractor.ContentSource.INPUT_STREAM;
+import static org.schabi.newpipe.extractor.subscription.SubscriptionExtractor.ContentSource.YOUTUBE_URL;
+import static org.schabi.newpipe.extractor.utils.Utils.UTF_8;
 
 /**
- * Extract subscriptions from a Google takeout export
+ * Extract subscriptions from a Google takeout export.
  */
 public class YoutubeSubscriptionExtractor extends SubscriptionExtractor {
     private static final String BASE_CHANNEL_URL = "https://www.youtube.com/channel/";
 
     public YoutubeSubscriptionExtractor(final YoutubeService youtubeService) {
-        super(youtubeService, Collections.singletonList(INPUT_STREAM));
+        super(youtubeService, Arrays.asList(INPUT_STREAM, YOUTUBE_URL));
     }
 
     @Override
@@ -202,5 +208,66 @@ public class YoutubeSubscriptionExtractor extends SubscriptionExtractor {
             throw new InvalidSourceException("Error reading CSV file on line = \"" + line
                     + "\", line number = " + currentLine, e);
         }
+    }
+
+    public List<SubscriptionItem> fromYoutubeUrl() throws ExtractionException, IOException {
+        //
+        // TODO: abstract / refactor / do better / maybe move to a parsing helper?
+        //
+
+        final List<SubscriptionItem> subscriptionItems = new ArrayList<>();
+
+        // @formatter:off
+        final byte[] body = JsonWriter.string(prepareDesktopJsonBuilder(YouTube.getLocalization(),
+                        YouTube.getContentCountry())
+                        .done())
+                .getBytes(UTF_8);
+        // @formatter:on
+
+        final JsonObject responseObj =
+                getJsonPostResponse("guide", body, YouTube.getLocalization());
+
+        final JsonArray items = responseObj.getArray("items");
+
+        for (final Object item : items) {
+            if (!((JsonObject) item).has("guideSubscriptionsSectionRenderer")) {
+                continue;
+            }
+            final JsonArray subItems = ((JsonObject) item)
+                    .getObject("guideSubscriptionsSectionRenderer")
+                    .getArray("items");
+
+            for (final Object subItem : subItems) {
+                if (((JsonObject) subItem).has("guideEntryRenderer")) {
+                    final JsonObject renderer = ((JsonObject) subItem)
+                            .getObject("guideEntryRenderer");
+                    final String id = renderer.getObject("navigationEndpoint")
+                            .getObject("browseEndpoint").getString("browseId");
+                    final String name = renderer.getObject("formattedTitle")
+                            .getString("simpleText");
+                    subscriptionItems.add(new SubscriptionItem(service.getServiceId(),
+                            BASE_CHANNEL_URL + id, name));
+                } else if (((JsonObject) subItem).has("guideCollapsibleEntryRenderer")) {
+                    final JsonObject renderer = ((JsonObject) subItem)
+                            .getObject("guideCollapsibleEntryRenderer");
+                    final JsonArray expandableItems = renderer.getArray("expandableItems");
+                    for (final Object expandableItem : expandableItems) {
+                        if (!((JsonObject) expandableItem).has("guideEntryRenderer")) {
+                            continue;
+                        }
+                        final JsonObject subRenderer = ((JsonObject) expandableItem)
+                                .getObject("guideEntryRenderer");
+                        final String id = subRenderer.getObject("navigationEndpoint")
+                                .getObject("browseEndpoint").getString("browseId");
+                        final String name = subRenderer.getObject("formattedTitle")
+                                .getString("simpleText");
+                        subscriptionItems.add(new SubscriptionItem(service.getServiceId(),
+                                BASE_CHANNEL_URL + id, name));
+                    }
+                }
+            }
+        }
+
+        return subscriptionItems;
     }
 }

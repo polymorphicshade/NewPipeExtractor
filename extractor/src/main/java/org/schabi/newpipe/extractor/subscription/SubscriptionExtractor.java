@@ -37,7 +37,7 @@ public abstract class SubscriptionExtractor {
     }
 
     public enum ContentSource {
-        CHANNEL_URL, INPUT_STREAM
+        CHANNEL_URL, INPUT_STREAM, YOUTUBE_URL
     }
 
     private final List<ContentSource> supportedSources;
