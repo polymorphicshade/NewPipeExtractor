@@ -125,7 +125,7 @@ public class YoutubeService extends StreamingService {
 
         if (!contentFilters.isEmpty() && contentFilters.get(0).startsWith("music_")) {
             return new YoutubeMusicSearchExtractor(this, query);
-        } else if (query.getSearchString().equalsIgnoreCase(":discover:")) {
+        } else if (query.getSearchString().equalsIgnoreCase(":explore:")) {
             return new YoutubeBrowseExtractor(this, query);
         } else {
             return new YoutubeSearchExtractor(this, query);
