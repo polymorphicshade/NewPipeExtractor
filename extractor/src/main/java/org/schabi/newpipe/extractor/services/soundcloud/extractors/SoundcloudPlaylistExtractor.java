@@ -8,6 +8,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
@@ -74,7 +75,7 @@ public class SoundcloudPlaylistExtractor extends PlaylistExtractor {
             // If the thumbnail is null, traverse the items list and get a valid one,
             // if it also fails, return null
             try {
-                final InfoItemsPage<StreamInfoItem> infoItems = getInitialPage();
+                final InfoItemsPage<StreamInfoItem> infoItems = getInitialPage(infoItem -> true);
 
                 for (final StreamInfoItem item : infoItems.getItems()) {
                     artworkUrl = item.getThumbnailUrl();
@@ -120,9 +121,10 @@ public class SoundcloudPlaylistExtractor extends PlaylistExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<StreamInfoItem> getInitialPage() {
+    public InfoItemsPage<StreamInfoItem> getInitialPage(
+            final IInfoItemFilter<StreamInfoItem> filter) {
         final StreamInfoItemsCollector streamInfoItemsCollector =
-                new StreamInfoItemsCollector(getServiceId());
+                new StreamInfoItemsCollector(getServiceId(), filter);
         final List<String> ids = new ArrayList<>();
 
         playlist.getArray("tracks")
@@ -145,7 +147,9 @@ public class SoundcloudPlaylistExtractor extends PlaylistExtractor {
     }
 
     @Override
-    public InfoItemsPage<StreamInfoItem> getPage(final Page page) throws IOException,
+    public InfoItemsPage<StreamInfoItem> getPage(final Page page,
+                                                 final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException,
             ExtractionException {
         if (page == null || isNullOrEmpty(page.getIds())) {
             throw new IllegalArgumentException("Page doesn't contain IDs");
@@ -165,7 +169,8 @@ public class SoundcloudPlaylistExtractor extends PlaylistExtractor {
         final String currentPageUrl = SOUNDCLOUD_API_V2_URL + "tracks?client_id="
                 + SoundcloudParsingHelper.clientId() + "&ids=" + String.join(",", currentIds);
 
-        final StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
+        final StreamInfoItemsCollector collector =
+                new StreamInfoItemsCollector(getServiceId(), filter);
         final String response = NewPipe.getDownloader().get(currentPageUrl,
                 getExtractorLocalization()).responseBody();
 

@@ -55,6 +55,11 @@ public class MediaCCCLiveStreamKioskExtractor implements StreamInfoItemExtractor
     }
 
     @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getDuration() throws ParsingException {
         return 0;
     }

@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.services.soundcloud.extractors;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
@@ -36,13 +37,16 @@ public class SoundcloudChartsExtractor extends KioskExtractor<StreamInfoItem> {
     }
 
     @Override
-    public InfoItemsPage<StreamInfoItem> getPage(final Page page) throws IOException,
+    public InfoItemsPage<StreamInfoItem> getPage(final Page page,
+                                                 final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException,
             ExtractionException {
         if (page == null || isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
         }
 
-        final StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
+        final StreamInfoItemsCollector collector =
+                new StreamInfoItemsCollector(getServiceId(), filter);
         final String nextPageUrl = SoundcloudParsingHelper.getStreamsFromApi(collector,
                 page.getUrl(), true);
 
@@ -51,8 +55,11 @@ public class SoundcloudChartsExtractor extends KioskExtractor<StreamInfoItem> {
 
     @Nonnull
     @Override
-    public InfoItemsPage<StreamInfoItem> getInitialPage() throws IOException, ExtractionException {
-        final StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
+    public InfoItemsPage<StreamInfoItem> getInitialPage(
+            final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
+        final StreamInfoItemsCollector collector =
+                new StreamInfoItemsCollector(getServiceId(), filter);
 
         String apiUrl = SOUNDCLOUD_API_V2_URL + "charts" + "?genre=soundcloud:genres:all-music"
                 + "&client_id=" + SoundcloudParsingHelper.clientId();

@@ -29,7 +29,7 @@ public class MediaCCCRecentListExtractorTest {
 
     @Test
     void testStreamList() throws Exception {
-        final List<StreamInfoItem> items = extractor.getInitialPage().getItems();
+        final List<StreamInfoItem> items = extractor.getInitialPage(infoItem -> true).getItems();
         assertFalse(items.isEmpty(), "No items returned");
 
         assertAll(items.stream().flatMap(this::getAllConditionsForItem));

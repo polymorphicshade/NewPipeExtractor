@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.comments.CommentsExtractor;
@@ -34,10 +35,12 @@ public class BandcampCommentsExtractor extends CommentsExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<CommentsInfoItem> getInitialPage()
+    public InfoItemsPage<CommentsInfoItem> getInitialPage(
+            final IInfoItemFilter<CommentsInfoItem> filter)
             throws IOException, ExtractionException {
 
-        final CommentsInfoItemsCollector collector = new CommentsInfoItemsCollector(getServiceId());
+        final CommentsInfoItemsCollector collector =
+                new CommentsInfoItemsCollector(getServiceId(), filter);
 
         final Elements writings = document.getElementsByClass("writing");
 
@@ -49,7 +52,8 @@ public class BandcampCommentsExtractor extends CommentsExtractor {
     }
 
     @Override
-    public InfoItemsPage<CommentsInfoItem> getPage(final Page page)
+    public InfoItemsPage<CommentsInfoItem> getPage(final Page page,
+                                                   final IInfoItemFilter<CommentsInfoItem> filter)
             throws IOException, ExtractionException {
         return null;
     }

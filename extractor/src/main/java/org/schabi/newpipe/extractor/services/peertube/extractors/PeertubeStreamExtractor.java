@@ -9,6 +9,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.MediaFormat;
 import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.StreamingService;
@@ -27,6 +28,7 @@ import org.schabi.newpipe.extractor.stream.DeliveryMethod;
 import org.schabi.newpipe.extractor.stream.Description;
 import org.schabi.newpipe.extractor.stream.Stream;
 import org.schabi.newpipe.extractor.stream.StreamExtractor;
+import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.extractor.stream.StreamInfoItemsCollector;
 import org.schabi.newpipe.extractor.stream.StreamType;
 import org.schabi.newpipe.extractor.stream.SubtitlesStream;
@@ -283,7 +285,8 @@ public class PeertubeStreamExtractor extends StreamExtractor {
 
     @Nullable
     @Override
-    public StreamInfoItemsCollector getRelatedItems() throws IOException, ExtractionException {
+    public StreamInfoItemsCollector getRelatedItems(final IInfoItemFilter filter)
+            throws IOException, ExtractionException {
         final List<String> tags = getTags();
         final String apiUrl;
         if (tags.isEmpty()) {
@@ -298,7 +301,7 @@ public class PeertubeStreamExtractor extends StreamExtractor {
             return null;
         } else {
             final StreamInfoItemsCollector collector = new StreamInfoItemsCollector(
-                    getServiceId());
+                    getServiceId(), filter);
             getStreamsFromApi(collector, apiUrl);
             return collector;
         }

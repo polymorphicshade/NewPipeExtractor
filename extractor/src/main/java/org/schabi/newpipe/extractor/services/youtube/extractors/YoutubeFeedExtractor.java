@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.ListExtractor;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
@@ -43,9 +44,11 @@ public class YoutubeFeedExtractor extends FeedExtractor {
 
     @Nonnull
     @Override
-    public ListExtractor.InfoItemsPage<StreamInfoItem> getInitialPage() {
+    public ListExtractor.InfoItemsPage<StreamInfoItem> getInitialPage(
+            final IInfoItemFilter<StreamInfoItem> filter) {
         final Elements entries = document.select("feed > entry");
-        final StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
+        final StreamInfoItemsCollector collector =
+                new StreamInfoItemsCollector(getServiceId(), filter);
 
         for (final Element entryElement : entries) {
             collector.commit(new YoutubeFeedInfoItemExtractor(entryElement));
@@ -73,7 +76,8 @@ public class YoutubeFeedExtractor extends FeedExtractor {
     }
 
     @Override
-    public InfoItemsPage<StreamInfoItem> getPage(final Page page) {
+    public InfoItemsPage<StreamInfoItem> getPage(final Page page,
+                                                 final IInfoItemFilter<StreamInfoItem> filter) {
         return InfoItemsPage.emptyPage();
     }
 }

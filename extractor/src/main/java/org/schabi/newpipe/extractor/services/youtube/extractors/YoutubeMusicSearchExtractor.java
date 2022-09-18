@@ -19,6 +19,7 @@ import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 import com.grack.nanojson.JsonWriter;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.MultiInfoItemsCollector;
@@ -189,8 +190,10 @@ public class YoutubeMusicSearchExtractor extends SearchExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<InfoItem> getInitialPage() throws IOException, ExtractionException {
-        final MultiInfoItemsCollector collector = new MultiInfoItemsCollector(getServiceId());
+    public InfoItemsPage<InfoItem> getInitialPage(final IInfoItemFilter<InfoItem> filter)
+            throws IOException, ExtractionException {
+        final MultiInfoItemsCollector collector =
+                new MultiInfoItemsCollector(getServiceId(), filter);
 
         final JsonArray contents = JsonUtils.getArray(JsonUtils.getArray(initialData,
                 "contents.tabbedSearchResultsRenderer.tabs").getObject(0),
@@ -213,13 +216,15 @@ public class YoutubeMusicSearchExtractor extends SearchExtractor {
     }
 
     @Override
-    public InfoItemsPage<InfoItem> getPage(final Page page)
+    public InfoItemsPage<InfoItem> getPage(final Page page,
+                                           final IInfoItemFilter<InfoItem> filter)
             throws IOException, ExtractionException {
         if (page == null || isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
         }
 
-        final MultiInfoItemsCollector collector = new MultiInfoItemsCollector(getServiceId());
+        final MultiInfoItemsCollector collector =
+                new MultiInfoItemsCollector(getServiceId(), filter);
 
         final String[] youtubeMusicKeys = YoutubeParsingHelper.getYoutubeMusicKey();
 

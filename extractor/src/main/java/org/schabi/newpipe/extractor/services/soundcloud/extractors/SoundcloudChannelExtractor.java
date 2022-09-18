@@ -7,6 +7,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.channel.ChannelExtractor;
@@ -108,10 +109,12 @@ public class SoundcloudChannelExtractor extends ChannelExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<StreamInfoItem> getInitialPage() throws ExtractionException {
+    public InfoItemsPage<StreamInfoItem> getInitialPage(
+            final IInfoItemFilter<StreamInfoItem> filter)
+            throws ExtractionException {
         try {
             final StreamInfoItemsCollector streamInfoItemsCollector =
-                    new StreamInfoItemsCollector(getServiceId());
+                    new StreamInfoItemsCollector(getServiceId(), filter);
 
             final String apiUrl = USERS_ENDPOINT + getId() + "/tracks" + "?client_id="
                     + SoundcloudParsingHelper.clientId() + "&limit=20" + "&linked_partitioning=1";
@@ -126,13 +129,16 @@ public class SoundcloudChannelExtractor extends ChannelExtractor {
     }
 
     @Override
-    public InfoItemsPage<StreamInfoItem> getPage(final Page page) throws IOException,
+    public InfoItemsPage<StreamInfoItem> getPage(final Page page,
+                                                 final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException,
             ExtractionException {
         if (page == null || isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
         }
 
-        final StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
+        final StreamInfoItemsCollector collector =
+                new StreamInfoItemsCollector(getServiceId(), filter);
         final String nextPageUrl = SoundcloudParsingHelper.getStreamsFromApiMinItems(15, collector,
                 page.getUrl());
 

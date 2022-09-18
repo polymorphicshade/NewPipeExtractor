@@ -3,6 +3,8 @@ package org.schabi.newpipe.extractor.services.peertube.extractors;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
+
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
@@ -86,13 +88,16 @@ public class PeertubePlaylistExtractor extends PlaylistExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<StreamInfoItem> getInitialPage() throws IOException, ExtractionException {
+    public InfoItemsPage<StreamInfoItem> getInitialPage(
+            final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
         return getPage(new Page(getUrl() + "/videos?" + START_KEY + "=0&"
-                + COUNT_KEY + "=" + ITEMS_PER_PAGE));
+                + COUNT_KEY + "=" + ITEMS_PER_PAGE), filter);
     }
 
     @Override
-    public InfoItemsPage<StreamInfoItem> getPage(final Page page)
+    public InfoItemsPage<StreamInfoItem> getPage(final Page page,
+                                                 final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
         if (page == null || isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
@@ -113,7 +118,8 @@ public class PeertubePlaylistExtractor extends PlaylistExtractor {
             PeertubeParsingHelper.validate(json);
             final long total = json.getLong("total");
 
-            final StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
+            final StreamInfoItemsCollector collector =
+                    new StreamInfoItemsCollector(getServiceId(), filter);
             collectStreamsFrom(collector, json, getBaseUrl());
 
             return new InfoItemsPage<>(collector,

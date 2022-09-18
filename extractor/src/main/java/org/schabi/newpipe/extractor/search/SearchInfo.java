@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.search;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.ListExtractor;
 import org.schabi.newpipe.extractor.ListInfo;
@@ -30,14 +31,16 @@ public class SearchInfo extends ListInfo<InfoItem> {
 
 
     public static SearchInfo getInfo(final StreamingService service,
-                                     final SearchQueryHandler searchQuery)
+                                     final SearchQueryHandler searchQuery,
+                                     final IInfoItemFilter<InfoItem> filter)
             throws ExtractionException, IOException {
         final SearchExtractor extractor = service.getSearchExtractor(searchQuery);
         extractor.fetchPage();
-        return getInfo(extractor);
+        return getInfo(extractor, filter);
     }
 
-    public static SearchInfo getInfo(final SearchExtractor extractor)
+    public static SearchInfo getInfo(final SearchExtractor extractor,
+                                     final IInfoItemFilter<InfoItem> filter)
             throws ExtractionException, IOException {
         final SearchInfo info = new SearchInfo(
                 extractor.getServiceId(),
@@ -66,7 +69,7 @@ public class SearchInfo extends ListInfo<InfoItem> {
         }
 
         final ListExtractor.InfoItemsPage<InfoItem> page
-                = ExtractorHelper.getItemsPageOrLogError(info, extractor);
+                = ExtractorHelper.getItemsPageOrLogError(info, extractor, filter);
         info.setRelatedItems(page.getItems());
         info.setNextPage(page.getNextPage());
 
@@ -74,11 +77,13 @@ public class SearchInfo extends ListInfo<InfoItem> {
     }
 
 
-    public static ListExtractor.InfoItemsPage<InfoItem> getMoreItems(final StreamingService service,
-                                                                     final SearchQueryHandler query,
-                                                                     final Page page)
+    public static ListExtractor.InfoItemsPage<InfoItem> getMoreItems(
+            final StreamingService service,
+            final SearchQueryHandler query,
+            final Page page,
+            final IInfoItemFilter<InfoItem> filter)
             throws IOException, ExtractionException {
-        return service.getSearchExtractor(query).getPage(page);
+        return service.getSearchExtractor(query).getPage(page, filter);
     }
 
     // Getter

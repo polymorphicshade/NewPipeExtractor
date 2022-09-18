@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.MultiInfoItemsCollector;
@@ -48,9 +49,10 @@ public class BandcampSearchExtractor extends SearchExtractor {
         return Collections.emptyList();
     }
 
-    public InfoItemsPage<InfoItem> getPage(final Page page)
+    public InfoItemsPage<InfoItem> getPage(final Page page, final IInfoItemFilter<InfoItem> filter)
             throws IOException, ExtractionException {
-        final MultiInfoItemsCollector collector = new MultiInfoItemsCollector(getServiceId());
+        final MultiInfoItemsCollector collector =
+                new MultiInfoItemsCollector(getServiceId(), filter);
         final Document d = Jsoup.parse(getDownloader().get(page.getUrl()).responseBody());
 
         for (final Element searchResult : d.getElementsByClass("searchresult")) {
@@ -111,8 +113,9 @@ public class BandcampSearchExtractor extends SearchExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<InfoItem> getInitialPage() throws IOException, ExtractionException {
-        return getPage(new Page(getUrl()));
+    public InfoItemsPage<InfoItem> getInitialPage(final IInfoItemFilter<InfoItem> filter)
+            throws IOException, ExtractionException {
+        return getPage(new Page(getUrl()), filter);
     }
 
     @Override

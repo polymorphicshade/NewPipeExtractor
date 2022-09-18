@@ -44,6 +44,11 @@ public class BandcampPlaylistStreamInfoItemExtractor extends BandcampStreamInfoI
     }
 
     @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getDuration() {
         return track.getLong("duration");
     }

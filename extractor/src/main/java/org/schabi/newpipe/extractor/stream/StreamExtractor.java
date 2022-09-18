@@ -20,6 +20,7 @@ package org.schabi.newpipe.extractor.stream;
  * along with NewPipe.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.InfoItemsCollector;
 import org.schabi.newpipe.extractor.InfoItemExtractor;
@@ -44,8 +45,9 @@ import java.util.Locale;
 
 /**
  * Scrapes information from a video/audio streaming service (eg, YouTube).
+ * @param <T>
  */
-public abstract class StreamExtractor extends Extractor {
+public abstract class StreamExtractor<T extends InfoItem> extends Extractor {
 
     public static final int NO_AGE_LIMIT = 0;
     public static final long UNKNOWN_SUBSCRIBER_COUNT = -1;
@@ -348,23 +350,27 @@ public abstract class StreamExtractor extends Extractor {
      * previously known as a next stream.
      * If related streams aren't available simply return {@code null}.
      *
+     * @param filter
      * @return a list of InfoItems showing the related videos/streams
      */
     @Nullable
     public InfoItemsCollector<? extends InfoItem, ? extends InfoItemExtractor>
-    getRelatedItems() throws IOException, ExtractionException {
+    getRelatedItems(final IInfoItemFilter<T> filter)
+            throws IOException, ExtractionException {
         return null;
     }
 
     /**
-     * @return The result of {@link #getRelatedItems()} if it is a
+     * @param filter
+     * @return The result of {@link #getRelatedItems(IInfoItemFilter)} if it is a
      * {@link StreamInfoItemsCollector}, <code>null</code> otherwise
-     * @deprecated Use {@link #getRelatedItems()}. May be removed in a future version.
+     * @deprecated Use {@link #getRelatedItems(IInfoItemFilter)}. May be removed in a future version.
      */
     @Deprecated
     @Nullable
-    public StreamInfoItemsCollector getRelatedStreams() throws IOException, ExtractionException {
-        final InfoItemsCollector<?, ?> collector = getRelatedItems();
+    public StreamInfoItemsCollector getRelatedStreams(final IInfoItemFilter<T> filter)
+            throws IOException, ExtractionException {
+        final InfoItemsCollector<?, ?> collector = getRelatedItems(filter);
         if (collector instanceof StreamInfoItemsCollector) {
             return (StreamInfoItemsCollector) collector;
         } else {

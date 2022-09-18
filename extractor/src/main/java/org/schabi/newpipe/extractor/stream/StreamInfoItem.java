@@ -42,6 +42,7 @@ public class StreamInfoItem extends InfoItem {
     private String uploaderUrl = null;
     private String uploaderAvatarUrl = null;
     private boolean uploaderVerified = false;
+    private boolean isShort;
 
     public StreamInfoItem(final int serviceId,
                           final String url,
@@ -69,6 +70,14 @@ public class StreamInfoItem extends InfoItem {
 
     public void setViewCount(final long viewCount) {
         this.viewCount = viewCount;
+    }
+
+    public boolean isShort() {
+        return isShort;
+    }
+
+    public void isShort(final boolean value) {
+        isShort = value;
     }
 
     public long getDuration() {

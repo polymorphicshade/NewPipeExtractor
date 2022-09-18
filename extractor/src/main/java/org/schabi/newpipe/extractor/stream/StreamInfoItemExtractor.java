@@ -46,6 +46,14 @@ public interface StreamInfoItemExtractor extends InfoItemExtractor {
     boolean isAd() throws ParsingException;
 
     /**
+     * Check if the stream is considered a "short" (i.e. YouTube Short)
+     *
+     * @return {@code true} if the stream is considered a "short".
+     * @throws ParsingException thrown if there is an error in the extraction
+     */
+    boolean isShort() throws ParsingException;
+
+    /**
      * Get the stream duration in seconds
      *
      * @return the stream duration in seconds

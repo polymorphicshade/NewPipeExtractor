@@ -50,11 +50,12 @@ public class MultiInfoItemsCollector extends InfoItemsCollector<InfoItem, InfoIt
     private final ChannelInfoItemsCollector userCollector;
     private final PlaylistInfoItemsCollector playlistCollector;
 
-    public MultiInfoItemsCollector(final int serviceId) {
-        super(serviceId);
-        streamCollector = new StreamInfoItemsCollector(serviceId);
-        userCollector = new ChannelInfoItemsCollector(serviceId);
-        playlistCollector = new PlaylistInfoItemsCollector(serviceId);
+    public MultiInfoItemsCollector(final int serviceId,
+                                   final IInfoItemFilter<InfoItem> filter) {
+        super(serviceId, filter);
+        streamCollector = new StreamInfoItemsCollector(serviceId, filter::isAllowed);
+        userCollector = new ChannelInfoItemsCollector(serviceId, infoItem -> true);
+        playlistCollector = new PlaylistInfoItemsCollector(serviceId, infoItem -> true);
     }
 
     @Override

@@ -1,13 +1,15 @@
 package org.schabi.newpipe.extractor.playlist;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItemsCollector;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
 
 public class PlaylistInfoItemsCollector
         extends InfoItemsCollector<PlaylistInfoItem, PlaylistInfoItemExtractor> {
 
-    public PlaylistInfoItemsCollector(final int serviceId) {
-        super(serviceId);
+    public PlaylistInfoItemsCollector(final int serviceId,
+                                      final IInfoItemFilter<PlaylistInfoItem> filter) {
+        super(serviceId, filter);
     }
 
     @Override

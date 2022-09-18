@@ -5,6 +5,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
@@ -31,7 +32,9 @@ public class SoundcloudCommentsExtractor extends CommentsExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<CommentsInfoItem> getInitialPage() throws ExtractionException,
+    public InfoItemsPage<CommentsInfoItem> getInitialPage(
+            final IInfoItemFilter<CommentsInfoItem> filter)
+            throws ExtractionException,
             IOException {
         final Downloader downloader = NewPipe.getDownloader();
         final Response response = downloader.get(getUrl());
@@ -44,7 +47,7 @@ public class SoundcloudCommentsExtractor extends CommentsExtractor {
         }
 
         final CommentsInfoItemsCollector collector = new CommentsInfoItemsCollector(
-                getServiceId());
+                getServiceId(), filter);
 
         collectStreamsFrom(collector, json.getArray("collection"));
 
@@ -52,7 +55,9 @@ public class SoundcloudCommentsExtractor extends CommentsExtractor {
     }
 
     @Override
-    public InfoItemsPage<CommentsInfoItem> getPage(final Page page) throws ExtractionException,
+    public InfoItemsPage<CommentsInfoItem> getPage(final Page page,
+                                                   final IInfoItemFilter<CommentsInfoItem> filter)
+            throws ExtractionException,
             IOException {
         if (page == null || isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
@@ -69,7 +74,7 @@ public class SoundcloudCommentsExtractor extends CommentsExtractor {
         }
 
         final CommentsInfoItemsCollector collector = new CommentsInfoItemsCollector(
-                getServiceId());
+                getServiceId(), filter);
 
         collectStreamsFrom(collector, json.getArray("collection"));
 

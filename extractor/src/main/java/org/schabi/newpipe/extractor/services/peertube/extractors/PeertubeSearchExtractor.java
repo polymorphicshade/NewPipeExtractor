@@ -3,6 +3,7 @@ package org.schabi.newpipe.extractor.services.peertube.extractors;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.Page;
@@ -65,13 +66,16 @@ public class PeertubeSearchExtractor extends SearchExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<InfoItem> getInitialPage() throws IOException, ExtractionException {
+    public InfoItemsPage<InfoItem> getInitialPage(
+            final IInfoItemFilter<InfoItem> filter)
+            throws IOException, ExtractionException {
         return getPage(new Page(getUrl() + "&" + START_KEY + "=0&"
-                + COUNT_KEY + "=" + ITEMS_PER_PAGE));
+                + COUNT_KEY + "=" + ITEMS_PER_PAGE), filter);
     }
 
     @Override
-    public InfoItemsPage<InfoItem> getPage(final Page page)
+    public InfoItemsPage<InfoItem> getPage(final Page page,
+                                           final IInfoItemFilter<InfoItem> filter)
             throws IOException, ExtractionException {
         if (page == null || isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
@@ -92,7 +96,8 @@ public class PeertubeSearchExtractor extends SearchExtractor {
             PeertubeParsingHelper.validate(json);
             final long total = json.getLong("total");
 
-            final MultiInfoItemsCollector collector = new MultiInfoItemsCollector(getServiceId());
+            final MultiInfoItemsCollector collector =
+                    new MultiInfoItemsCollector(getServiceId(), filter);
             collectStreamsFrom(collector, json, getBaseUrl(), sepia);
 
             return new InfoItemsPage<>(collector,

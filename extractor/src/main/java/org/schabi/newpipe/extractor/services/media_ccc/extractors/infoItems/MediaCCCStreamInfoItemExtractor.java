@@ -27,6 +27,11 @@ public class MediaCCCStreamInfoItemExtractor implements StreamInfoItemExtractor 
     }
 
     @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getDuration() {
         return event.getInt("length");
     }

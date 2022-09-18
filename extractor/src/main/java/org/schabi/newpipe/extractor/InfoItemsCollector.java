@@ -2,6 +2,7 @@ package org.schabi.newpipe.extractor;
 
 import org.schabi.newpipe.extractor.exceptions.FoundAdException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
+import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -37,21 +38,28 @@ public abstract class InfoItemsCollector<I extends InfoItem, E extends InfoItemE
     private final int serviceId;
     @Nullable
     private final Comparator<I> comparator;
+    private final IInfoItemFilter<I> filter;
 
     /**
      * Create a new collector with no comparator / sorting function
      * @param serviceId the service id
+     * @param filter
      */
-    public InfoItemsCollector(final int serviceId) {
-        this(serviceId, null);
+    public InfoItemsCollector(final int serviceId, final IInfoItemFilter<I> filter) {
+        this(serviceId, filter, null);
     }
 
     /**
      * Create a new collector
      * @param serviceId the service id
+     * @param filter
+     * @param comparator
      */
-    public InfoItemsCollector(final int serviceId, @Nullable final Comparator<I> comparator) {
+    public InfoItemsCollector(final int serviceId,
+                              @Nullable final IInfoItemFilter<I> filter,
+                              @Nullable final Comparator<I> comparator) {
         this.serviceId = serviceId;
+        this.filter = filter;
         this.comparator = comparator;
     }
 
@@ -101,7 +109,19 @@ public abstract class InfoItemsCollector<I extends InfoItem, E extends InfoItemE
     @Override
     public void commit(final E extractor) {
         try {
-            addItem(extract(extractor));
+            final I item = extract(extractor);
+            if (filter != null) {
+                try {
+                    if (filter.isAllowed(item)) {
+                        addItem(item);
+                    }
+                } catch (final ClassCastException e) {
+                    // TODO: figure out this cast problem, might need to change generics somewhere
+                    addItem(item);
+                }
+            } else {
+                addItem(item);
+            }
         } catch (final FoundAdException ae) {
             // found an ad. Maybe a debug line could be placed here
         } catch (final ParsingException e) {

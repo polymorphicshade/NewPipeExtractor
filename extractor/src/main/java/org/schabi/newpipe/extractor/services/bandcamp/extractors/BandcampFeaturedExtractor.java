@@ -6,6 +6,8 @@ import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
+
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
@@ -58,17 +60,20 @@ public class BandcampFeaturedExtractor extends KioskExtractor<PlaylistInfoItem> 
 
     @Nonnull
     @Override
-    public InfoItemsPage<PlaylistInfoItem> getInitialPage()
+    public InfoItemsPage<PlaylistInfoItem> getInitialPage(
+            final IInfoItemFilter<PlaylistInfoItem> filter)
             throws IOException, ExtractionException {
         final JsonArray featuredStories = json.getObject("feed_content")
                 .getObject("stories")
                 .getArray("featured");
 
-        return extractItems(featuredStories);
+        return extractItems(featuredStories, filter);
     }
 
-    private InfoItemsPage<PlaylistInfoItem> extractItems(final JsonArray featuredStories) {
-        final PlaylistInfoItemsCollector c = new PlaylistInfoItemsCollector(getServiceId());
+    private InfoItemsPage<PlaylistInfoItem> extractItems(
+            final JsonArray featuredStories,
+            final IInfoItemFilter<PlaylistInfoItem> filter) {
+        final PlaylistInfoItemsCollector c = new PlaylistInfoItemsCollector(getServiceId(), filter);
 
         for (int i = 0; i < featuredStories.size(); i++) {
             final JsonObject featuredStory = featuredStories.getObject(i);
@@ -99,7 +104,8 @@ public class BandcampFeaturedExtractor extends KioskExtractor<PlaylistInfoItem> 
     }
 
     @Override
-    public InfoItemsPage<PlaylistInfoItem> getPage(final Page page)
+    public InfoItemsPage<PlaylistInfoItem> getPage(final Page page,
+                                                   final IInfoItemFilter<PlaylistInfoItem> filter)
             throws IOException, ExtractionException {
 
         final JsonObject response;
@@ -111,6 +117,6 @@ public class BandcampFeaturedExtractor extends KioskExtractor<PlaylistInfoItem> 
             throw new ParsingException("Could not parse Bandcamp featured API response", e);
         }
 
-        return extractItems(response.getObject("stories").getArray("featured"));
+        return extractItems(response.getObject("stories").getArray("featured"), filter);
     }
 }

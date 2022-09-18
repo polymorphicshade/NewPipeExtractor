@@ -93,4 +93,9 @@ public class BandcampRadioInfoItemExtractor implements StreamInfoItemExtractor {
     public boolean isAd() {
         return false;
     }
+
+    @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
 }

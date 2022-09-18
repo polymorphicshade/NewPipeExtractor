@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.playlist;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.ListExtractor.InfoItemsPage;
 import org.schabi.newpipe.extractor.ListInfo;
 import org.schabi.newpipe.extractor.NewPipe;
@@ -58,22 +59,28 @@ public final class PlaylistInfo extends ListInfo<StreamInfoItem> {
         super(serviceId, linkHandler, name);
     }
 
-    public static PlaylistInfo getInfo(final String url) throws IOException, ExtractionException {
-        return getInfo(NewPipe.getServiceByUrl(url), url);
+    public static PlaylistInfo getInfo(final String url,
+                                       final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
+        return getInfo(NewPipe.getServiceByUrl(url), url, filter);
     }
 
-    public static PlaylistInfo getInfo(final StreamingService service, final String url)
+    public static PlaylistInfo getInfo(final StreamingService service,
+                                       final String url,
+                                       final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
         final PlaylistExtractor extractor = service.getPlaylistExtractor(url);
         extractor.fetchPage();
-        return getInfo(extractor);
+        return getInfo(extractor, filter);
     }
 
-    public static InfoItemsPage<StreamInfoItem> getMoreItems(final StreamingService service,
-                                                             final String url,
-                                                             final Page page)
+    public static InfoItemsPage<StreamInfoItem> getMoreItems(
+            final StreamingService service,
+            final String url,
+            final Page page,
+            final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
-        return service.getPlaylistExtractor(url).getPage(page);
+        return service.getPlaylistExtractor(url).getPage(page, filter);
     }
 
     /**
@@ -81,7 +88,8 @@ public final class PlaylistInfo extends ListInfo<StreamInfoItem> {
      *
      * @param extractor an extractor where fetchPage() was already got called on.
      */
-    public static PlaylistInfo getInfo(final PlaylistExtractor extractor)
+    public static PlaylistInfo getInfo(final PlaylistExtractor extractor,
+                                       final IInfoItemFilter<StreamInfoItem> filter)
             throws ExtractionException {
 
         final PlaylistInfo info = new PlaylistInfo(
@@ -158,7 +166,7 @@ public final class PlaylistInfo extends ListInfo<StreamInfoItem> {
         }
 
         final InfoItemsPage<StreamInfoItem> itemsPage
-                = ExtractorHelper.getItemsPageOrLogError(info, extractor);
+                = ExtractorHelper.getItemsPageOrLogError(info, extractor, filter);
         info.setRelatedItems(itemsPage.getItems());
         info.setNextPage(itemsPage.getNextPage());
 

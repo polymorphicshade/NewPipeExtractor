@@ -1,6 +1,8 @@
 package org.schabi.newpipe.extractor.subscription;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.StreamingService;
+import org.schabi.newpipe.extractor.channel.ChannelInfoItem;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
 
@@ -66,7 +68,8 @@ public abstract class SubscriptionExtractor {
      *
      * @throws InvalidSourceException when the channelUrl doesn't exist or is invalid
      */
-    public List<SubscriptionItem> fromChannelUrl(final String channelUrl)
+    public List<SubscriptionItem> fromChannelUrl(final String channelUrl,
+                                                 final IInfoItemFilter<ChannelInfoItem> filter)
             throws IOException, ExtractionException {
         throw new UnsupportedOperationException("Service " + service.getServiceInfo().getName()
                 + " doesn't support extracting from a channel url");

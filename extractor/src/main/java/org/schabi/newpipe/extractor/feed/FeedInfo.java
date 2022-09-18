@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.feed;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.ListExtractor.InfoItemsPage;
 import org.schabi.newpipe.extractor.ListInfo;
 import org.schabi.newpipe.extractor.NewPipe;
@@ -23,11 +24,13 @@ public class FeedInfo extends ListInfo<StreamInfoItem> {
         super(serviceId, id, url, originalUrl, name, contentFilter, sortFilter);
     }
 
-    public static FeedInfo getInfo(final String url) throws IOException, ExtractionException {
-        return getInfo(NewPipe.getServiceByUrl(url), url);
+    public static FeedInfo getInfo(final String url, final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
+        return getInfo(NewPipe.getServiceByUrl(url), url, filter);
     }
 
-    public static FeedInfo getInfo(final StreamingService service, final String url)
+    public static FeedInfo getInfo(final StreamingService service, final String url,
+                                   final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
         final FeedExtractor extractor = service.getFeedExtractor(url);
 
@@ -37,10 +40,11 @@ public class FeedInfo extends ListInfo<StreamInfoItem> {
         }
 
         extractor.fetchPage();
-        return getInfo(extractor);
+        return getInfo(extractor, filter);
     }
 
-    public static FeedInfo getInfo(final FeedExtractor extractor)
+    public static FeedInfo getInfo(final FeedExtractor extractor,
+                                   final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
         extractor.fetchPage();
 
@@ -53,7 +57,7 @@ public class FeedInfo extends ListInfo<StreamInfoItem> {
         final FeedInfo info = new FeedInfo(serviceId, id, url, originalUrl, name, null, null);
 
         final InfoItemsPage<StreamInfoItem> itemsPage
-                = ExtractorHelper.getItemsPageOrLogError(info, extractor);
+                = ExtractorHelper.getItemsPageOrLogError(info, extractor, filter);
         info.setRelatedItems(itemsPage.getItems());
         info.setNextPage(itemsPage.getNextPage());
 

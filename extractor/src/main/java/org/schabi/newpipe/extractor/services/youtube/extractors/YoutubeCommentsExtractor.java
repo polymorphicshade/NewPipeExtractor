@@ -13,6 +13,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.comments.CommentsExtractor;
@@ -53,7 +54,8 @@ public class YoutubeCommentsExtractor extends CommentsExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<CommentsInfoItem> getInitialPage()
+    public InfoItemsPage<CommentsInfoItem> getInitialPage(
+            final IInfoItemFilter<CommentsInfoItem> filter)
             throws IOException, ExtractionException {
 
         // Check if findInitialCommentsToken was already called and optCommentsDisabled initialized
@@ -68,7 +70,7 @@ public class YoutubeCommentsExtractor extends CommentsExtractor {
             return getInfoItemsPageForDisabledComments();
         }
 
-        return getPage(getNextPage(commentsToken));
+        return getPage(getNextPage(commentsToken), filter);
     }
 
     /**
@@ -171,7 +173,8 @@ public class YoutubeCommentsExtractor extends CommentsExtractor {
     }
 
     @Override
-    public InfoItemsPage<CommentsInfoItem> getPage(final Page page)
+    public InfoItemsPage<CommentsInfoItem> getPage(final Page page,
+                                                   final IInfoItemFilter<CommentsInfoItem> filter)
             throws IOException, ExtractionException {
         if (optCommentsDisabled.orElse(false)) {
             return getInfoItemsPageForDisabledComments();
@@ -190,7 +193,7 @@ public class YoutubeCommentsExtractor extends CommentsExtractor {
         final JsonObject ajaxJson = getJsonPostResponse("next", body, localization);
 
         final CommentsInfoItemsCollector collector = new CommentsInfoItemsCollector(
-                getServiceId());
+                getServiceId(), filter);
         collectCommentsFrom(collector, ajaxJson);
         return new InfoItemsPage<>(collector, getNextPage(ajaxJson));
     }

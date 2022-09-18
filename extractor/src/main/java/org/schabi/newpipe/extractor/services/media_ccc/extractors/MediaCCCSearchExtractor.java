@@ -9,6 +9,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.Page;
@@ -64,14 +65,15 @@ public class MediaCCCSearchExtractor extends SearchExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<InfoItem> getInitialPage() {
-        final MultiInfoItemsCollector searchItems = new MultiInfoItemsCollector(getServiceId());
+    public InfoItemsPage<InfoItem> getInitialPage(final IInfoItemFilter<InfoItem> filter) {
+        final MultiInfoItemsCollector searchItems =
+                new MultiInfoItemsCollector(getServiceId(), filter);
 
         if (getLinkHandler().getContentFilters().contains(CONFERENCES)
                 || getLinkHandler().getContentFilters().contains(ALL)
                 || getLinkHandler().getContentFilters().isEmpty()) {
             searchConferences(getSearchString(),
-                    conferenceKiosk.getInitialPage().getItems(),
+                    conferenceKiosk.getInitialPage(filter::isAllowed).getItems(),
                     searchItems);
         }
 
@@ -93,7 +95,8 @@ public class MediaCCCSearchExtractor extends SearchExtractor {
     }
 
     @Override
-    public InfoItemsPage<InfoItem> getPage(final Page page) {
+    public InfoItemsPage<InfoItem> getPage(final Page page,
+                                           final IInfoItemFilter<InfoItem> filter) {
         return InfoItemsPage.emptyPage();
     }
 

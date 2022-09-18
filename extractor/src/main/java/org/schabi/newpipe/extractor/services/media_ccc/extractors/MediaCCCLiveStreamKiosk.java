@@ -2,6 +2,8 @@ package org.schabi.newpipe.extractor.services.media_ccc.extractors;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
+
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
@@ -32,8 +34,11 @@ public class MediaCCCLiveStreamKiosk extends KioskExtractor<StreamInfoItem> {
 
     @Nonnull
     @Override
-    public InfoItemsPage<StreamInfoItem> getInitialPage() throws IOException, ExtractionException {
-        final StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
+    public InfoItemsPage<StreamInfoItem> getInitialPage(
+            final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
+        final StreamInfoItemsCollector collector =
+                new StreamInfoItemsCollector(getServiceId(), filter);
         for (int c = 0; c < doc.size(); c++) {
             final JsonObject conference = doc.getObject(c);
             final JsonArray groups = conference.getArray("groups");
@@ -51,7 +56,8 @@ public class MediaCCCLiveStreamKiosk extends KioskExtractor<StreamInfoItem> {
     }
 
     @Override
-    public InfoItemsPage<StreamInfoItem> getPage(final Page page)
+    public InfoItemsPage<StreamInfoItem> getPage(final Page page,
+                                                 final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
         return InfoItemsPage.emptyPage();
     }

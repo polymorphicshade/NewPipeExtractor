@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.channel;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.ListExtractor.InfoItemsPage;
 import org.schabi.newpipe.extractor.ListInfo;
 import org.schabi.newpipe.extractor.NewPipe;
@@ -44,25 +45,31 @@ public class ChannelInfo extends ListInfo<StreamInfoItem> {
                 listLinkHandler.getSortFilter());
     }
 
-    public static ChannelInfo getInfo(final String url) throws IOException, ExtractionException {
-        return getInfo(NewPipe.getServiceByUrl(url), url);
+    public static ChannelInfo getInfo(final String url,
+                                      final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
+        return getInfo(NewPipe.getServiceByUrl(url), url, filter);
     }
 
-    public static ChannelInfo getInfo(final StreamingService service, final String url)
+    public static ChannelInfo getInfo(final StreamingService service, final String url,
+                                      final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
         final ChannelExtractor extractor = service.getChannelExtractor(url);
         extractor.fetchPage();
-        return getInfo(extractor);
+        return getInfo(extractor, filter);
     }
 
-    public static InfoItemsPage<StreamInfoItem> getMoreItems(final StreamingService service,
-                                                             final String url,
-                                                             final Page page)
+    public static InfoItemsPage<StreamInfoItem> getMoreItems(
+            final StreamingService service,
+            final String url,
+            final Page page,
+            final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
-        return service.getChannelExtractor(url).getPage(page);
+        return service.getChannelExtractor(url).getPage(page, filter);
     }
 
-    public static ChannelInfo getInfo(final ChannelExtractor extractor)
+    public static ChannelInfo getInfo(final ChannelExtractor extractor,
+                                      final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
 
         final int serviceId = extractor.getServiceId();
@@ -91,7 +98,7 @@ public class ChannelInfo extends ListInfo<StreamInfoItem> {
         }
 
         final InfoItemsPage<StreamInfoItem> itemsPage =
-                ExtractorHelper.getItemsPageOrLogError(info, extractor);
+                ExtractorHelper.getItemsPageOrLogError(info, extractor, filter);
         info.setRelatedItems(itemsPage.getItems());
         info.setNextPage(itemsPage.getNextPage());
 

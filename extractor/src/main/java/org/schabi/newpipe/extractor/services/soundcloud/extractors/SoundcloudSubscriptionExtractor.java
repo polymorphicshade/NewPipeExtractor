@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.services.soundcloud.extractors;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.channel.ChannelInfoItem;
 import org.schabi.newpipe.extractor.channel.ChannelInfoItemsCollector;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
@@ -32,7 +33,9 @@ public class SoundcloudSubscriptionExtractor extends SubscriptionExtractor {
     }
 
     @Override
-    public List<SubscriptionItem> fromChannelUrl(final String channelUrl) throws IOException,
+    public List<SubscriptionItem> fromChannelUrl(final String channelUrl,
+                                                 final IInfoItemFilter<ChannelInfoItem> filter)
+            throws IOException,
             ExtractionException {
         if (channelUrl == null) {
             throw new InvalidSourceException("Channel url is null");
@@ -48,7 +51,7 @@ public class SoundcloudSubscriptionExtractor extends SubscriptionExtractor {
         final String apiUrl = SOUNDCLOUD_API_V2_URL + "users/" + id + "/followings" + "?client_id="
                 + SoundcloudParsingHelper.clientId() + "&limit=200";
         final ChannelInfoItemsCollector collector = new ChannelInfoItemsCollector(service
-                .getServiceId());
+                .getServiceId(), filter);
         // ± 2000 is the limit of followings on SoundCloud, so this minimum should be enough
         SoundcloudParsingHelper.getUsersFromApiMinItems(2500, collector, apiUrl);
 

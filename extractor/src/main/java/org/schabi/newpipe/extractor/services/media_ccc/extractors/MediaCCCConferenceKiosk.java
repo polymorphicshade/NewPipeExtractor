@@ -5,6 +5,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.channel.ChannelInfoItem;
@@ -31,9 +32,11 @@ public class MediaCCCConferenceKiosk extends KioskExtractor<ChannelInfoItem> {
 
     @Nonnull
     @Override
-    public InfoItemsPage<ChannelInfoItem> getInitialPage() {
+    public InfoItemsPage<ChannelInfoItem> getInitialPage(
+            final IInfoItemFilter<ChannelInfoItem> filter) {
         final JsonArray conferences = doc.getArray("conferences");
-        final ChannelInfoItemsCollector collector = new ChannelInfoItemsCollector(getServiceId());
+        final ChannelInfoItemsCollector collector =
+                new ChannelInfoItemsCollector(getServiceId(), filter);
         for (int i = 0; i < conferences.size(); i++) {
             collector.commit(new MediaCCCConferenceInfoItemExtractor(conferences.getObject(i)));
         }
@@ -43,7 +46,8 @@ public class MediaCCCConferenceKiosk extends KioskExtractor<ChannelInfoItem> {
 
     @Override
 
-    public InfoItemsPage<ChannelInfoItem> getPage(final Page page) {
+    public InfoItemsPage<ChannelInfoItem> getPage(final Page page,
+                                                  final IInfoItemFilter<ChannelInfoItem> filter) {
         return InfoItemsPage.emptyPage();
     }
 

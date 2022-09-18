@@ -46,6 +46,8 @@ import com.grack.nanojson.JsonWriter;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ScriptableObject;
+import org.schabi.newpipe.extractor.IInfoItemFilter;
+import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.MediaFormat;
 import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.MultiInfoItemsCollector;
@@ -102,7 +104,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class YoutubeStreamExtractor extends StreamExtractor {
+public class YoutubeStreamExtractor extends StreamExtractor<InfoItem> {
     /*//////////////////////////////////////////////////////////////////////////
     // Exceptions
     //////////////////////////////////////////////////////////////////////////*/
@@ -682,7 +684,8 @@ public class YoutubeStreamExtractor extends StreamExtractor {
 
     @Nullable
     @Override
-    public MultiInfoItemsCollector getRelatedItems() throws ExtractionException {
+    public MultiInfoItemsCollector getRelatedItems(final IInfoItemFilter<InfoItem> filter)
+            throws ExtractionException {
         assertPageFetched();
 
         if (getAgeLimit() != NO_AGE_LIMIT) {
@@ -690,7 +693,8 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         }
 
         try {
-            final MultiInfoItemsCollector collector = new MultiInfoItemsCollector(getServiceId());
+            final MultiInfoItemsCollector collector =
+                    new MultiInfoItemsCollector(getServiceId(), filter);
 
             final JsonArray results = nextResponse
                     .getObject("contents")

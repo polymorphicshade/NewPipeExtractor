@@ -8,6 +8,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.InfoItemExtractor;
 import org.schabi.newpipe.extractor.InfoItemsCollector;
@@ -59,14 +60,17 @@ public class SoundcloudSearchExtractor extends SearchExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<InfoItem> getInitialPage() throws IOException, ExtractionException {
+    public InfoItemsPage<InfoItem> getInitialPage(final IInfoItemFilter<InfoItem> filter)
+            throws IOException, ExtractionException {
         return new InfoItemsPage<>(
-                collectItems(initialSearchCollection),
+                collectItems(initialSearchCollection, filter),
                 getNextPageFromCurrentUrl(getUrl(), currentOffset -> ITEMS_PER_PAGE));
     }
 
     @Override
-    public InfoItemsPage<InfoItem> getPage(final Page page) throws IOException,
+    public InfoItemsPage<InfoItem> getPage(final Page page,
+                                           final IInfoItemFilter<InfoItem> filter)
+            throws IOException,
             ExtractionException {
         if (page == null || isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
@@ -82,7 +86,7 @@ public class SoundcloudSearchExtractor extends SearchExtractor {
             throw new ParsingException("Could not parse json response", e);
         }
 
-        return new InfoItemsPage<>(collectItems(searchCollection),
+        return new InfoItemsPage<>(collectItems(searchCollection, filter),
                 getNextPageFromCurrentUrl(page.getUrl(),
                         currentOffset -> currentOffset + ITEMS_PER_PAGE));
     }
@@ -105,8 +109,10 @@ public class SoundcloudSearchExtractor extends SearchExtractor {
     }
 
     private InfoItemsCollector<InfoItem, InfoItemExtractor> collectItems(
-            final JsonArray searchCollection) {
-        final MultiInfoItemsCollector collector = new MultiInfoItemsCollector(getServiceId());
+            final JsonArray searchCollection,
+            final IInfoItemFilter<InfoItem> filter) {
+        final MultiInfoItemsCollector collector =
+                new MultiInfoItemsCollector(getServiceId(), filter);
 
         for (final Object result : searchCollection) {
             if (!(result instanceof JsonObject)) {

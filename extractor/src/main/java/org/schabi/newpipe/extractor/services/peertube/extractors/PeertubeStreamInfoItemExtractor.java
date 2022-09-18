@@ -43,6 +43,11 @@ public class PeertubeStreamInfoItemExtractor implements StreamInfoItemExtractor 
     }
 
     @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getViewCount() {
         return item.getLong("views");
     }

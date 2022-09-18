@@ -11,6 +11,7 @@ import com.grack.nanojson.JsonParserException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.MediaFormat;
 import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.StreamingService;
@@ -20,6 +21,7 @@ import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
 import org.schabi.newpipe.extractor.exceptions.ReCaptchaException;
 import org.schabi.newpipe.extractor.linkhandler.LinkHandler;
+import org.schabi.newpipe.extractor.playlist.PlaylistInfoItem;
 import org.schabi.newpipe.extractor.playlist.PlaylistInfoItemsCollector;
 import org.schabi.newpipe.extractor.stream.AudioStream;
 import org.schabi.newpipe.extractor.stream.Description;
@@ -182,7 +184,7 @@ public class BandcampRadioStreamExtractor extends BandcampStreamExtractor {
     }
 
     @Override
-    public PlaylistInfoItemsCollector getRelatedItems() {
+    public PlaylistInfoItemsCollector getRelatedItems(final IInfoItemFilter filter) {
         // Contrary to other Bandcamp streams, radio streams don't have related items
         return null;
     }

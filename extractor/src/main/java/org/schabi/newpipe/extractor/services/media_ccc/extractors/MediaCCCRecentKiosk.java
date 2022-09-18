@@ -5,6 +5,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
@@ -44,7 +45,9 @@ public class MediaCCCRecentKiosk extends KioskExtractor<StreamInfoItem> {
 
     @Nonnull
     @Override
-    public InfoItemsPage<StreamInfoItem> getInitialPage() throws IOException, ExtractionException {
+    public InfoItemsPage<StreamInfoItem> getInitialPage(
+            final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
         final JsonArray events = doc.getArray("events");
 
         // Streams in the recent kiosk are not ordered by the release date.
@@ -54,7 +57,7 @@ public class MediaCCCRecentKiosk extends KioskExtractor<StreamInfoItem> {
         comparator = comparator.reversed();
 
         final StreamInfoItemsCollector collector =
-                new StreamInfoItemsCollector(getServiceId(), comparator);
+                new StreamInfoItemsCollector(getServiceId(), filter, comparator);
 
         events.stream()
                 .filter(JsonObject.class::isInstance)
@@ -68,7 +71,8 @@ public class MediaCCCRecentKiosk extends KioskExtractor<StreamInfoItem> {
     }
 
     @Override
-    public InfoItemsPage<StreamInfoItem> getPage(final Page page)
+    public InfoItemsPage<StreamInfoItem> getPage(final Page page,
+                                                 final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
         return InfoItemsPage.emptyPage();
     }

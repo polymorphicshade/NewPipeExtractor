@@ -51,6 +51,11 @@ public class BandcampSearchStreamInfoItemExtractor extends BandcampStreamInfoIte
     }
 
     @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getDuration() {
         return -1;
     }

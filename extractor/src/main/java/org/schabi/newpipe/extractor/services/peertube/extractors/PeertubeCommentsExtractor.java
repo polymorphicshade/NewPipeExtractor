@@ -3,6 +3,8 @@ package org.schabi.newpipe.extractor.services.peertube.extractors;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
+
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Page;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.comments.CommentsExtractor;
@@ -33,10 +35,11 @@ public class PeertubeCommentsExtractor extends CommentsExtractor {
 
     @Nonnull
     @Override
-    public InfoItemsPage<CommentsInfoItem> getInitialPage()
+    public InfoItemsPage<CommentsInfoItem> getInitialPage(
+            final IInfoItemFilter<CommentsInfoItem> filter)
             throws IOException, ExtractionException {
         return getPage(new Page(getUrl() + "?" + START_KEY + "=0&"
-                + COUNT_KEY + "=" + ITEMS_PER_PAGE));
+                + COUNT_KEY + "=" + ITEMS_PER_PAGE), filter);
     }
 
     private void collectCommentsFrom(final CommentsInfoItemsCollector collector,
@@ -54,7 +57,8 @@ public class PeertubeCommentsExtractor extends CommentsExtractor {
     }
 
     @Override
-    public InfoItemsPage<CommentsInfoItem> getPage(final Page page)
+    public InfoItemsPage<CommentsInfoItem> getPage(final Page page,
+                                                   final IInfoItemFilter<CommentsInfoItem> filter)
             throws IOException, ExtractionException {
         if (page == null || isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
@@ -76,7 +80,7 @@ public class PeertubeCommentsExtractor extends CommentsExtractor {
             final long total = json.getLong("total");
 
             final CommentsInfoItemsCollector collector
-                    = new CommentsInfoItemsCollector(getServiceId());
+                    = new CommentsInfoItemsCollector(getServiceId(), filter);
             collectCommentsFrom(collector, json);
 
             return new InfoItemsPage<>(collector,

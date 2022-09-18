@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.stream;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.Info;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.MetaInfo;
@@ -64,23 +65,28 @@ public class StreamInfo extends Info {
         this.ageLimit = ageLimit;
     }
 
-    public static StreamInfo getInfo(final String url) throws IOException, ExtractionException {
-        return getInfo(NewPipe.getServiceByUrl(url), url);
+    public static StreamInfo getInfo(final String url,
+                                     final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
+        return getInfo(NewPipe.getServiceByUrl(url), url, filter);
     }
 
     public static StreamInfo getInfo(@Nonnull final StreamingService service,
-                                     final String url) throws IOException, ExtractionException {
-        return getInfo(service.getStreamExtractor(url));
+                                     final String url,
+                                     final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
+        return getInfo(service.getStreamExtractor(url), filter);
     }
 
-    public static StreamInfo getInfo(@Nonnull final StreamExtractor extractor)
+    public static StreamInfo getInfo(@Nonnull final StreamExtractor extractor,
+                                     final IInfoItemFilter<StreamInfoItem> filter)
             throws ExtractionException, IOException {
         extractor.fetchPage();
         final StreamInfo streamInfo;
         try {
             streamInfo = extractImportantData(extractor);
             extractStreams(streamInfo, extractor);
-            extractOptionalData(streamInfo, extractor);
+            extractOptionalData(streamInfo, extractor, filter);
             return streamInfo;
 
         } catch (final ExtractionException e) {
@@ -192,7 +198,8 @@ public class StreamInfo extends Info {
 
     @SuppressWarnings("MethodLength")
     private static void extractOptionalData(final StreamInfo streamInfo,
-                                            final StreamExtractor extractor) {
+                                            final StreamExtractor extractor,
+                                            final IInfoItemFilter<StreamInfoItem> filter) {
         /* ---- Optional data goes here: ---- */
         // If one of these fails, the frontend needs to handle that they are not available.
         // Exceptions are therefore not thrown into the frontend, but stored into the error list,
@@ -344,7 +351,7 @@ public class StreamInfo extends Info {
         }
 
         streamInfo.setRelatedItems(ExtractorHelper.getRelatedItemsOrLogError(streamInfo,
-                extractor));
+                extractor, filter));
     }
 
     private StreamType streamType;

@@ -39,19 +39,23 @@ public abstract class ListExtractor<R extends InfoItem> extends Extractor {
      * A {@link InfoItemsPage InfoItemsPage} corresponding to the initial page
      * where the items are from the initial request and the nextPage relative to it.
      *
+     * @param filter
      * @return a {@link InfoItemsPage} corresponding to the initial page
      */
     @Nonnull
-    public abstract InfoItemsPage<R> getInitialPage() throws IOException, ExtractionException;
+    public abstract InfoItemsPage<R> getInitialPage(IInfoItemFilter<R> filter)
+            throws IOException, ExtractionException;
 
     /**
      * Get a list of items corresponding to the specific requested page.
      *
      * @param page any page got from the exclusive implementation of the list extractor
+     * @param filter
      * @return a {@link InfoItemsPage} corresponding to the requested page
      * @see InfoItemsPage#getNextPage()
      */
-    public abstract InfoItemsPage<R> getPage(Page page) throws IOException, ExtractionException;
+    public abstract InfoItemsPage<R> getPage(Page page, IInfoItemFilter<R> filter)
+            throws IOException, ExtractionException;
 
     @Nonnull
     @Override
@@ -91,7 +95,7 @@ public abstract class ListExtractor<R extends InfoItem> extends Extractor {
         /**
          * Url pointing to the next page relative to this one
          *
-         * @see ListExtractor#getPage(Page)
+         * @see ListExtractor#getPage(Page, IInfoItemFilter)
          * @see Page
          */
         private final Page nextPage;

@@ -11,6 +11,7 @@ import com.grack.nanojson.JsonParserException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.MediaFormat;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
@@ -18,6 +19,7 @@ import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
 import org.schabi.newpipe.extractor.linkhandler.LinkHandler;
 import org.schabi.newpipe.extractor.localization.DateWrapper;
+import org.schabi.newpipe.extractor.playlist.PlaylistInfoItem;
 import org.schabi.newpipe.extractor.playlist.PlaylistInfoItemsCollector;
 import org.schabi.newpipe.extractor.stream.AudioStream;
 import org.schabi.newpipe.extractor.stream.Description;
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class BandcampStreamExtractor extends StreamExtractor {
+public class BandcampStreamExtractor extends StreamExtractor<PlaylistInfoItem> {
     private JsonObject albumJson;
     private JsonObject current;
     private Document document;
@@ -176,8 +178,12 @@ public class BandcampStreamExtractor extends StreamExtractor {
     }
 
     @Override
-    public PlaylistInfoItemsCollector getRelatedItems() {
-        final PlaylistInfoItemsCollector collector = new PlaylistInfoItemsCollector(getServiceId());
+    public PlaylistInfoItemsCollector getRelatedItems(
+            final IInfoItemFilter filter) {
+        final PlaylistInfoItemsCollector collector =
+                new PlaylistInfoItemsCollector(
+                        getServiceId(),
+                        filter); // TODO: FILTER - fix
         document.getElementsByClass("recommended-album")
                 .stream()
                 .map(BandcampRelatedPlaylistInfoItemExtractor::new)

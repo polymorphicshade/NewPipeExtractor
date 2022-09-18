@@ -89,4 +89,9 @@ public class SoundcloudStreamInfoItemExtractor implements StreamInfoItemExtracto
     public boolean isAd() {
         return false;
     }
+
+    @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
 }

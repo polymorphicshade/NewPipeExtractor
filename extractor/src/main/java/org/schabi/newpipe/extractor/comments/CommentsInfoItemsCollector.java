@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.comments;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItemsCollector;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
 
@@ -9,8 +10,9 @@ import java.util.List;
 public final class CommentsInfoItemsCollector
         extends InfoItemsCollector<CommentsInfoItem, CommentsInfoItemExtractor> {
 
-    public CommentsInfoItemsCollector(final int serviceId) {
-        super(serviceId);
+    public CommentsInfoItemsCollector(final int serviceId,
+                                      final IInfoItemFilter<CommentsInfoItem> filter) {
+        super(serviceId, filter);
     }
 
     @Override

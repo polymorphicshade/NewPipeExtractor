@@ -30,6 +30,11 @@ public class YoutubeFeedInfoItemExtractor implements StreamInfoItemExtractor {
     }
 
     @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getDuration() {
         // Not available when fetching through the feed endpoint.
         return -1;

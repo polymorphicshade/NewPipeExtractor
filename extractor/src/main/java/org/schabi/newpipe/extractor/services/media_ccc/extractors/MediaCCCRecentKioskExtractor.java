@@ -47,6 +47,11 @@ public class MediaCCCRecentKioskExtractor implements StreamInfoItemExtractor {
     }
 
     @Override
+    public boolean isShort() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getDuration() {
         // duration and length have the same value, see
         // https://github.com/voc/voctoweb/blob/master/app/views/public/shared/_event.json.jbuilder

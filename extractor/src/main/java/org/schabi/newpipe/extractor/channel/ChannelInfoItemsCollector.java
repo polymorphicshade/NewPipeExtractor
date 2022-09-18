@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.channel;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItemsCollector;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
 
@@ -25,8 +26,9 @@ import org.schabi.newpipe.extractor.exceptions.ParsingException;
 
 public final class ChannelInfoItemsCollector
         extends InfoItemsCollector<ChannelInfoItem, ChannelInfoItemExtractor> {
-    public ChannelInfoItemsCollector(final int serviceId) {
-        super(serviceId);
+    public ChannelInfoItemsCollector(final int serviceId,
+                                     final IInfoItemFilter<ChannelInfoItem> filter) {
+        super(serviceId, filter);
     }
 
     @Override

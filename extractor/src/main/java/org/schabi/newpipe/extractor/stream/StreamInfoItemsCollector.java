@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.stream;
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.InfoItemsCollector;
 import org.schabi.newpipe.extractor.exceptions.FoundAdException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
@@ -29,13 +30,18 @@ import java.util.Comparator;
 public class StreamInfoItemsCollector
         extends InfoItemsCollector<StreamInfoItem, StreamInfoItemExtractor> {
 
-    public StreamInfoItemsCollector(final int serviceId) {
-        super(serviceId);
+    private IInfoItemFilter<StreamInfoItem> filter;
+
+    public StreamInfoItemsCollector(final int serviceId,
+                                    final IInfoItemFilter<StreamInfoItem> filter) {
+        super(serviceId, filter);
+        this.filter = filter;
     }
 
     public StreamInfoItemsCollector(final int serviceId,
+                                    final IInfoItemFilter<StreamInfoItem> filter,
                                     final Comparator<StreamInfoItem> comparator) {
-        super(serviceId, comparator);
+        super(serviceId, filter, comparator);
     }
 
     @Override
@@ -48,6 +54,11 @@ public class StreamInfoItemsCollector
                 getServiceId(), extractor.getUrl(), extractor.getName(), extractor.getStreamType());
 
         // optional information
+        try {
+            resultItem.isShort(extractor.isShort());
+        } catch (final Exception e) {
+            addError(e);
+        }
         try {
             resultItem.setDuration(extractor.getDuration());
         } catch (final Exception e) {
@@ -105,7 +116,19 @@ public class StreamInfoItemsCollector
     @Override
     public void commit(final StreamInfoItemExtractor extractor) {
         try {
-            addItem(extract(extractor));
+            final StreamInfoItem item = extract(extractor);
+            if (filter != null) {
+                try {
+                    if (filter.isAllowed(item)) {
+                        addItem(item);
+                    }
+                } catch (final ClassCastException e) {
+                    // TODO: figure out this cast problem, might need to change generics somewhere
+                    addItem(item);
+                }
+            } else {
+                addItem(item);
+            }
         } catch (final FoundAdException ae) {
             //System.out.println("AD_WARNING: " + ae.getMessage());
         } catch (final Exception e) {

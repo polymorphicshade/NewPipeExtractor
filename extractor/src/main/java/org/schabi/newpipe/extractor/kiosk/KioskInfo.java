@@ -20,6 +20,7 @@ package org.schabi.newpipe.extractor.kiosk;
  * along with NewPipe.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.schabi.newpipe.extractor.IInfoItemFilter;
 import org.schabi.newpipe.extractor.ListExtractor;
 import org.schabi.newpipe.extractor.ListInfo;
 import org.schabi.newpipe.extractor.NewPipe;
@@ -38,35 +39,42 @@ public final class KioskInfo extends ListInfo<StreamInfoItem> {
     }
 
     public static ListExtractor.InfoItemsPage<StreamInfoItem> getMoreItems(
-            final StreamingService service, final String url, final Page page)
+            final StreamingService service, final String url, final Page page,
+            final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
-        return service.getKioskList().getExtractorByUrl(url, page).getPage(page);
+        return service.getKioskList().getExtractorByUrl(url, page).getPage(page, filter);
     }
 
-    public static KioskInfo getInfo(final String url) throws IOException, ExtractionException {
-        return getInfo(NewPipe.getServiceByUrl(url), url);
+    public static KioskInfo getInfo(final String url,
+                                    final IInfoItemFilter<StreamInfoItem> filter)
+            throws IOException, ExtractionException {
+        return getInfo(NewPipe.getServiceByUrl(url), url, filter);
     }
 
-    public static KioskInfo getInfo(final StreamingService service, final String url)
+    public static KioskInfo getInfo(final StreamingService service, final String url,
+                                    final IInfoItemFilter<StreamInfoItem> filter)
             throws IOException, ExtractionException {
         final KioskExtractor extractor = service.getKioskList().getExtractorByUrl(url, null);
         extractor.fetchPage();
-        return getInfo(extractor);
+        return getInfo(extractor, filter);
     }
 
     /**
      * Get KioskInfo from KioskExtractor
      *
      * @param extractor an extractor where fetchPage() was already got called on.
+     * @param filter
      */
-    public static KioskInfo getInfo(final KioskExtractor extractor) throws ExtractionException {
+    public static KioskInfo getInfo(final KioskExtractor extractor,
+                                    final IInfoItemFilter<StreamInfoItem> filter)
+            throws ExtractionException {
 
         final KioskInfo info = new KioskInfo(extractor.getServiceId(),
                 extractor.getLinkHandler(),
                 extractor.getName());
 
         final ListExtractor.InfoItemsPage<StreamInfoItem> itemsPage
-                = ExtractorHelper.getItemsPageOrLogError(info, extractor);
+                = ExtractorHelper.getItemsPageOrLogError(info, extractor, filter);
         info.setRelatedItems(itemsPage.getItems());
         info.setNextPage(itemsPage.getNextPage());
 
