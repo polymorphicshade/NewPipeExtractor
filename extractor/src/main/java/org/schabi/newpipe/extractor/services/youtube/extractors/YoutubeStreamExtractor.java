@@ -99,6 +99,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -696,14 +697,29 @@ public class YoutubeStreamExtractor extends StreamExtractor<InfoItem> {
             final MultiInfoItemsCollector collector =
                     new MultiInfoItemsCollector(getServiceId(), filter);
 
-            final JsonArray results = nextResponse
+            final TimeAgoParser timeAgoParser = getTimeAgoParser();
+
+            JsonArray results = nextResponse
                     .getObject("contents")
                     .getObject("twoColumnWatchNextResults")
                     .getObject("secondaryResults")
                     .getObject("secondaryResults")
                     .getArray("results");
 
-            final TimeAgoParser timeAgoParser = getTimeAgoParser();
+            final Optional<JsonObject> itemSectionRendererContainer = results.stream()
+                    .filter(JsonObject.class::isInstance)
+                    .map(JsonObject.class::cast)
+                    .filter(x -> x.has("itemSectionRenderer"))
+                    .findFirst();
+
+            // if we are using a login cookie, the resulting json is a bit
+            // different, so we have to find where the actual renderers are
+            if (itemSectionRendererContainer.isPresent()) {
+                final JsonObject itemSectionRenderer =
+                        itemSectionRendererContainer.get().getObject("itemSectionRenderer");
+                results = itemSectionRenderer.getArray("contents");
+            }
+
             results.stream()
                     .filter(JsonObject.class::isInstance)
                     .map(JsonObject.class::cast)
